@@ -16,7 +16,7 @@ const CONFIG = {
     // WAJIB DIGANTI - URL Backend
     // ==========================================
     // Dapatkan URL ini dari: Google Sheets → Extensions → Apps Script → Deploy → Web app
-    APPS_SCRIPT_URL: 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE',
+    APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbznl36XHnHunwktpZVkwcCPsiYDukc3mG6k4K3H1lt568ylXRUum-wmh8gO4MulJGG5/exec',
 
     // ==========================================
     // INFO PERUSAHAAN
