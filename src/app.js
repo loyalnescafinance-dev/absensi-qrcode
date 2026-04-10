@@ -136,23 +136,71 @@ function handleCameraCapture(event) {
     const file = event.target.files[0];
     if (!file) return;
 
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-        showNotification('❌ Ukuran foto maksimal 5MB', true);
+    // Validate file size (max 10MB raw, will be compressed)
+    if (file.size > 10 * 1024 * 1024) {
+        showNotification('❌ Ukuran foto maksimal 10MB', true);
         return;
     }
 
-    // Convert to base64
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        photoData = e.target.result;
+    // Compress and resize image before storing
+    compressImage(file, 800, 0.6).then(compressedBase64 => {
+        photoData = compressedBase64;
+        console.log('📸 Photo compressed:', Math.round(compressedBase64.length / 1024) + 'KB');
 
         // Show preview
         elements.capturedPhoto.src = photoData;
         elements.photoPreview.style.display = 'block';
         elements.btnCamera.style.display = 'none';
-    };
-    reader.readAsDataURL(file);
+    }).catch(err => {
+        console.error('Compress error:', err);
+        showNotification('❌ Gagal memproses foto', true);
+    });
+}
+
+/**
+ * Compress and resize image using canvas
+ * @param {File} file - Image file
+ * @param {number} maxSize - Max width/height in pixels
+ * @param {number} quality - JPEG quality (0-1)
+ * @returns {Promise<string>} Compressed base64 data URL
+ */
+function compressImage(file, maxSize, quality) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+
+                // Resize if larger than maxSize
+                if (width > maxSize || height > maxSize) {
+                    if (width > height) {
+                        height = Math.round((height * maxSize) / width);
+                        width = maxSize;
+                    } else {
+                        width = Math.round((width * maxSize) / height);
+                        height = maxSize;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Convert to compressed JPEG
+                const compressed = canvas.toDataURL('image/jpeg', quality);
+                resolve(compressed);
+            };
+            img.onerror = reject;
+            img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
 }
 
 function retakePhoto() {
