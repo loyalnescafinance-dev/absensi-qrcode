@@ -122,7 +122,7 @@ Pengajuan izin baru dari: ${data.nama}
 - Alasan: ${data.alasan}
 - Durasi: ${data.durasi || 'SEHARI_PENUH'}
 
-🔗 Approve/Reject di: https://mfikrifajrulmajdi-code.github.io/absensi-qrcode/admin/admin.html
+🔗 Approve/Reject di: https://loyalnescafinance-dev.github.io/absensi-qrcode/admin/admin.html
   `;
   
   MailApp.sendEmail(ADMIN_EMAIL, subject, body);

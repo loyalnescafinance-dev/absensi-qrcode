@@ -26,17 +26,17 @@ Sistem absensi karyawan berbasis QR Code dengan fitur lengkap: foto absen, valid
 ### 🌐 Production URL
 
 ```
-https://mfikrifajrulmajdi-code.github.io/absensi-qrcode/
+https://loyalnescafinance-dev.github.io/absensi-qrcode/
 ```
 
 ### 🔗 Akses Modul
 
 | Modul | URL |
 |-------|-----|
-| **Halaman Absensi** | [absensi-qrcode/](https://mfikrifajrulmajdi-code.github.io/absensi-qrcode/) |
-| **Dashboard Admin** | [admin/admin.html](https://mfikrifajrulmajdi-code.github.io/absensi-qrcode/admin/admin.html) |
-| **Form Izin** | [src/izin.html](https://mfikrifajrulmajdi-code.github.io/absensi-qrcode/src/izin.html) |
-| **QR Generator** | [tools/qr-generator.html](https://mfikrifajrulmajdi-code.github.io/absensi-qrcode/tools/qr-generator.html) |
+| **Halaman Absensi** | [absensi-qrcode/](https://loyalnescafinance-dev.github.io/absensi-qrcode/) |
+| **Dashboard Admin** | [admin/admin.html](https://loyalnescafinance-dev.github.io/absensi-qrcode/admin/admin.html) |
+| **Form Izin** | [src/izin.html](https://loyalnescafinance-dev.github.io/absensi-qrcode/src/izin.html) |
+| **QR Generator** | [tools/qr-generator.html](https://loyalnescafinance-dev.github.io/absensi-qrcode/tools/qr-generator.html) |
 
 ---
 
@@ -113,7 +113,7 @@ https://mfikrifajrulmajdi-code.github.io/absensi-qrcode/
 
 ```bash
 # Clone atau download repository
-git clone https://github.com/mfikrifajrulmajdi-code/absensi-qrcode.git
+git clone https://github.com/loyalnescafinance-dev/absensi-qrcode.git
 cd absensi-qrcode
 
 # Update Apps Script URL di 3 file:
@@ -362,7 +362,7 @@ This project is open source and available for personal and commercial use.
 ## 👥 Author
 
 **M Fikri Fajrul Majdi**
-- GitHub: [@mfikrifajrulmajdi-code](https://github.com/mfikrifajrulmajdi-code)
+- GitHub: [@loyalnescafinance-dev](https://github.com/loyalnescafinance-dev)
 - Project: Sistem Absensi QR Code V2
 
 ---

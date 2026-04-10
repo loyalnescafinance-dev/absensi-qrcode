@@ -46,7 +46,7 @@
 
 **URL:**
 ```
-https://mfikrifajrulmajdi-code.github.io/absensi-qrcode/
+https://loyalnescafinance-dev.github.io/absensi-qrcode/
 ```
 
 **Expected Results:**
@@ -84,7 +84,7 @@ https://mfikrifajrulmajdi-code.github.io/absensi-qrcode/
 
 **URL:**
 ```
-https://mfikrifajrulmajdi-code.github.io/absensi-qrcode/tools/qr-generator.html
+https://loyalnescafinance-dev.github.io/absensi-qrcode/tools/qr-generator.html
 ```
 
 ### ✅ 2.2 Generate QR untuk Test User
@@ -113,7 +113,7 @@ Logo URL: (kosongkan)
 
 **Expected URL setelah scan:**
 ```
-https://mfikrifajrulmajdi-code.github.io/absensi-qrcode/?nama=Test%20User&perusahaan=PT%20Test%20Maju
+https://loyalnescafinance-dev.github.io/absensi-qrcode/?nama=Test%20User&perusahaan=PT%20Test%20Maju
 ```
 
 ---
@@ -298,7 +298,7 @@ Tahun: 2026
 
 **URL:**
 ```
-https://mfikrifajrulmajdi-code.github.io/absensi-qrcode/admin/admin.html
+https://loyalnescafinance-dev.github.io/absensi-qrcode/admin/admin.html
 ```
 
 ### ✅ 7.2 Verifikasi Summary Cards
@@ -370,7 +370,7 @@ Filter by Tipe: "MASUK"
 
 **URL:**
 ```
-https://mfikrifajrulmajdi-code.github.io/absensi-qrcode/src/izin.html?nama=Test%20User
+https://loyalnescafinance-dev.github.io/absensi-qrcode/src/izin.html?nama=Test%20User
 ```
 
 ### ✅ 8.2 Verifikasi Form

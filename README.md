@@ -10,14 +10,14 @@ Sistem absensi karyawan berbasis QR Code dengan fitur lengkap: foto absen, valid
 
 **Production URL:**
 ```
-https://mfikrifajrulmajdi-code.github.io/absensi-qrcode/
+https://loyalnescafinance-dev.github.io/absensi-qrcode/
 ```
 
 **Quick Links:**
-- 🏢 [Halaman Absensi](https://mfikrifajrulmajdi-code.github.io/absensi-qrcode/)
-- 📊 [Dashboard Admin](https://mfikrifajrulmajdi-code.github.io/absensi-qrcode/admin/admin.html)
-- 📝 [Form Izin](https://mfikrifajrulmajdi-code.github.io/absensi-qrcode/src/izin.html)
-- 🎨 [QR Generator](https://mfikrifajrulmajdi-code.github.io/absensi-qrcode/tools/qr-generator.html)
+- 🏢 [Halaman Absensi](https://loyalnescafinance-dev.github.io/absensi-qrcode/)
+- 📊 [Dashboard Admin](https://loyalnescafinance-dev.github.io/absensi-qrcode/admin/admin.html)
+- 📝 [Form Izin](https://loyalnescafinance-dev.github.io/absensi-qrcode/src/izin.html)
+- 🎨 [QR Generator](https://loyalnescafinance-dev.github.io/absensi-qrcode/tools/qr-generator.html)
 
 ---
 
@@ -40,8 +40,8 @@ https://mfikrifajrulmajdi-code.github.io/absensi-qrcode/
 
 ### Opsi 1: Gunakan Live Demo (Langsung Pakai)
 
-1. **Buka**: https://mfikrifajrulmajdi-code.github.io/absensi-qrcode/
-2. **Generate QR** untuk karyawan di: [QR Generator](https://mfikrifajrulmajdi-code.github.io/absensi-qrcode/tools/qr-generator.html)
+1. **Buka**: https://loyalnescafinance-dev.github.io/absensi-qrcode/
+2. **Generate QR** untuk karyawan di: [QR Generator](https://loyalnescafinance-dev.github.io/absensi-qrcode/tools/qr-generator.html)
 3. **Scan QR** dengan HP
 4. **Mulai absen!**
 
@@ -127,7 +127,7 @@ absensi-qrcode/
 Siap untuk test? Buka **[TESTING_GUIDE.md](TESTING_GUIDE.md)** dan ikuti checklist dari Phase 1-10!
 
 **Quick Test:**
-1. Buka: https://mfikrifajrulmajdi-code.github.io/absensi-qrcode/?nama=TestUser&perusahaan=PT%20Test
+1. Buka: https://loyalnescafinance-dev.github.io/absensi-qrcode/?nama=TestUser&perusahaan=PT%20Test
 2. Cek apakah halaman muncul dengan benar
 3. Cek console (F12) untuk error
 
