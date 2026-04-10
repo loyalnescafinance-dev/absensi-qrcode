@@ -54,10 +54,29 @@ async function loadReport() {
         const url = `${APPS_SCRIPT_URL}?action=getPayrollReport&bulan=${bulan}&tahun=${tahun}`;
         console.log('Fetching payroll report:', url);
 
-        const response = await fetch(url);
-        const result = await response.json();
+        const response = await fetch(url, { redirect: 'follow' });
+        console.log('Response status:', response.status);
+        console.log('Response url:', response.url);
+
+        const responseText = await response.text();
+        console.log('Raw response (first 500 chars):', responseText.substring(0, 500));
+
+        let result;
+        try {
+            result = JSON.parse(responseText);
+        } catch (parseErr) {
+            console.error('JSON parse failed, trying to extract JSON from response...');
+            // Sometimes Google returns HTML wrapper, try to find JSON in it
+            const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                result = JSON.parse(jsonMatch[0]);
+            } else {
+                throw new Error('Server tidak mengembalikan JSON. Response: ' + responseText.substring(0, 200));
+            }
+        }
 
         console.log('Payroll data:', result);
+        console.log('Data length:', result.data ? result.data.length : 'no data array');
 
         reportData = result;
 
@@ -87,6 +106,7 @@ async function loadReport() {
 
     } catch (error) {
         console.error('Error loading report:', error);
+        console.error('Error details:', error.message);
         document.getElementById('loadingState').style.display = 'none';
         document.getElementById('emptyState').style.display = 'block';
         document.querySelector('.empty-state h3').textContent = 'Gagal Memuat Data';
