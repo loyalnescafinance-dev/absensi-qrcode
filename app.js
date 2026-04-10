@@ -473,17 +473,36 @@ async function submitAbsensi(tipe) {
 
     try {
         // Send to Google Apps Script
-        // Using no-cors mode because Google Apps Script doesn't send CORS headers
+        // Using redirect:follow to handle Google's redirect, and text/plain to avoid CORS preflight
         const response = await fetch(APPS_SCRIPT_URL, {
             method: 'POST',
-            mode: 'no-cors',
+            redirect: 'follow',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'text/plain;charset=utf-8'
             },
             body: JSON.stringify(data)
         });
 
-        console.log('Fetch completed, response:', response);
+        console.log('Fetch completed, response status:', response.status);
+
+        let result = null;
+        try {
+            const responseText = await response.text();
+            console.log('Response text:', responseText);
+            result = JSON.parse(responseText);
+            console.log('Parsed result:', result);
+        } catch (parseErr) {
+            console.warn('Could not parse response:', parseErr);
+        }
+
+        // Check if backend returned an error
+        if (result && result.status === 'error') {
+            alert('⚠️ ' + (result.message || 'Gagal menyimpan data'));
+            showNotification('❌ ' + (result.message || 'Gagal menyimpan'), true);
+            showLoading(false);
+            isSubmitting = false;
+            return;
+        }
 
         // Show success notification
         const successMsg = tipe === 'MASUK'

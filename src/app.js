@@ -393,18 +393,31 @@ async function submitAbsensi(tipe) {
 
     try {
         // Send to Google Apps Script
-        // Using no-cors mode because Google Apps Script doesn't send CORS headers
-        await fetch(APPS_SCRIPT_URL, {
+        // Using text/plain to avoid CORS preflight, redirect:follow for Google's redirect
+        const response = await fetch(APPS_SCRIPT_URL, {
             method: 'POST',
-            mode: 'no-cors',
+            redirect: 'follow',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'text/plain;charset=utf-8'
             },
             body: JSON.stringify(data)
         });
 
-        // With no-cors, we can't read the response, but request is sent
-        // Show success (assuming it worked)
+        let result = null;
+        try {
+            const responseText = await response.text();
+            result = JSON.parse(responseText);
+        } catch (parseErr) {
+            console.warn('Could not parse response:', parseErr);
+        }
+
+        // Check if backend returned an error
+        if (result && result.status === 'error') {
+            showNotification('❌ ' + (result.message || 'Gagal menyimpan data'), true);
+            return;
+        }
+
+        // Show success
         const successMsg = tipe === 'MASUK'
             ? '✅ Absensi MASUK berhasil!'
             : '✅ Absensi PULANG berhasil!';
@@ -419,7 +432,7 @@ async function submitAbsensi(tipe) {
         // Refresh status after successful submit
         setTimeout(async () => {
             await checkAbsensiStatus();
-        }, 1000);
+        }, 3000);
 
         // Clear photo after successful submit
         if (tipe === 'PULANG') {

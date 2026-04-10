@@ -156,12 +156,26 @@ async function submitIzin(event) {
 
         const response = await fetch(APPS_SCRIPT_URL, {
             method: 'POST',
-            mode: 'no-cors',
+            redirect: 'follow',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'text/plain;charset=utf-8'
             },
             body: JSON.stringify(data)
         });
+
+        let result = null;
+        try {
+            const responseText = await response.text();
+            result = JSON.parse(responseText);
+        } catch (parseErr) {
+            console.warn('Could not parse response:', parseErr);
+        }
+
+        // Check if backend returned an error
+        if (result && result.status === 'error') {
+            showNotification('❌ ' + (result.message || 'Gagal mengirim pengajuan'), true);
+            return;
+        }
 
         // Success
         showNotification('✅ Pengajuan izin berhasil dikirim! Menunggu approval admin.', false);
