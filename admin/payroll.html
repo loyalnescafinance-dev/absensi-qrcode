@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rekap Penggajian - Sistem Absensi</title>
+    <meta name="description" content="Report rekap bulanan kehadiran karyawan untuk penggajian">
+    <link rel="stylesheet" href="payroll.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="header-top">
+                <a href="admin.html" class="back-link">← Dashboard</a>
+            </div>
+            <h1>💰 Rekap Penggajian</h1>
+            <p class="subtitle">Report Kehadiran Bulanan Otomatis</p>
+        </header>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <div class="filter-group">
+                <label for="filterBulan">Bulan</label>
+                <select id="filterBulan">
+                    <option value="1">Januari</option>
+                    <option value="2">Februari</option>
+                    <option value="3">Maret</option>
+                    <option value="4">April</option>
+                    <option value="5">Mei</option>
+                    <option value="6">Juni</option>
+                    <option value="7">Juli</option>
+                    <option value="8">Agustus</option>
+                    <option value="9">September</option>
+                    <option value="10">Oktober</option>
+                    <option value="11">November</option>
+                    <option value="12">Desember</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filterTahun">Tahun</label>
+                <select id="filterTahun"></select>
+            </div>
+            <button class="btn btn-load" onclick="loadReport()">
+                📊 Generate Report
+            </button>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="summary-grid" id="summarySection" style="display:none;">
+            <div class="stat-card card-hadir">
+                <div class="stat-icon">✅</div>
+                <div class="stat-value" id="sumHadir">0</div>
+                <div class="stat-label">Total Hadir</div>
+            </div>
+            <div class="stat-card card-sakit">
+                <div class="stat-icon">🤒</div>
+                <div class="stat-value" id="sumSakit">0</div>
+                <div class="stat-label">Total Sakit</div>
+            </div>
+            <div class="stat-card card-izin">
+                <div class="stat-icon">📋</div>
+                <div class="stat-value" id="sumIzin">0</div>
+                <div class="stat-label">Total Izin</div>
+            </div>
+            <div class="stat-card card-alfa">
+                <div class="stat-icon">❌</div>
+                <div class="stat-value" id="sumAlfa">0</div>
+                <div class="stat-label">Total Alfa</div>
+            </div>
+            <div class="stat-card card-kerja">
+                <div class="stat-icon">📅</div>
+                <div class="stat-value" id="sumHariKerja">0</div>
+                <div class="stat-label">Hari Kerja</div>
+            </div>
+            <div class="stat-card card-karyawan">
+                <div class="stat-icon">👥</div>
+                <div class="stat-value" id="sumKaryawan">0</div>
+                <div class="stat-label">Karyawan</div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading-state" id="loadingState" style="display:none;">
+            <div class="spinner"></div>
+            <p>Mengambil data dari server...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState">
+            <div class="empty-icon">📊</div>
+            <h3>Pilih Bulan & Tahun</h3>
+            <p>Klik "Generate Report" untuk menampilkan rekap kehadiran</p>
+        </div>
+
+        <!-- Report Table -->
+        <div class="report-section" id="reportSection" style="display:none;">
+            <div class="report-header">
+                <h2 id="reportTitle">Rekap April 2026</h2>
+                <div class="report-actions">
+                    <button class="btn btn-export" onclick="exportCSV()">📥 Export CSV</button>
+                    <button class="btn btn-print" onclick="printReport()">🖨️ Print</button>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table id="payrollTable">
+                    <thead>
+                        <tr>
+                            <th class="col-no">No</th>
+                            <th class="col-nama">Nama</th>
+                            <th class="col-num">Hari Kerja</th>
+                            <th class="col-num col-hadir">Hadir</th>
+                            <th class="col-num col-sakit">Sakit</th>
+                            <th class="col-num col-izin">Izin</th>
+                            <th class="col-num col-cuti">Cuti</th>
+                            <th class="col-num col-alfa">Alfa</th>
+                            <th class="col-num">Total Jam</th>
+                            <th class="col-num">Rata-rata</th>
+                            <th class="col-num col-terlambat">Terlambat</th>
+                            <th class="col-num col-lembur">Lembur</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="report-footer">
+                <p>Hari Kerja: Senin - Sabtu | Jam Masuk Standar: 08:00 WIB</p>
+                <p id="reportGenerated"></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="../config.js"></script>
+    <script src="payroll.js"></script>
+</body>
+
+</html>

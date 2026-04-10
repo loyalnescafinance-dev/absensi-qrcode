@@ -157,6 +157,8 @@ function doGet(e) {
     return getRiwayatIzin(e.parameter.nama);
   } else if (action === 'getAllIzin') {
     return getAllIzin(e.parameter);
+  } else if (action === 'getPayrollReport') {
+    return getPayrollReport(e.parameter.bulan, e.parameter.tahun);
   }
 
   // Default response
@@ -1009,6 +1011,247 @@ function approveIzin(e) {
       message: error.toString()
     });
   }
+}
+
+// ============================================
+// PAYROLL REPORT - Rekap bulanan per karyawan
+// ============================================
+
+/**
+ * Generate payroll report: rekap absensi bulanan per karyawan
+ * Menghitung: hadir, sakit, izin, cuti, alfa, total jam, terlambat, lembur
+ * Hari kerja: Senin-Sabtu
+ */
+function getPayrollReport(bulan, tahun) {
+  var bulanNum = parseInt(bulan);
+  var tahunNum = parseInt(tahun);
+  
+  Logger.log("=== getPayrollReport START === bulan=" + bulanNum + ", tahun=" + tahunNum);
+  
+  // 1. Hitung total hari kerja (Senin-Sabtu) dalam bulan
+  var totalHariKerja = hitungHariKerja(bulanNum, tahunNum);
+  
+  // 2. Ambil data Absensi
+  var absensiSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Absensi");
+  var absensiData = absensiSheet ? absensiSheet.getDataRange().getValues() : [];
+  
+  // 3. Ambil data Izin (APPROVED saja)
+  var izinSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Izin");
+  var izinData = izinSheet ? izinSheet.getDataRange().getValues() : [];
+  
+  // 4. Group absensi per karyawan per hari
+  var karyawanMap = {}; // { nama: { dates: { "2026-04-10": [{tipe, jam}] }, ... } }
+  
+  for (var i = 1; i < absensiData.length; i++) {
+    var rowTimestamp = absensiData[i][0];
+    var rowNama = absensiData[i][1];
+    var rowTipe = absensiData[i][2];
+    
+    if (!rowTimestamp || !rowNama) continue;
+    
+    var rowDate, rowTime;
+    if (rowTimestamp instanceof Date) {
+      rowDate = Utilities.formatDate(rowTimestamp, "Asia/Jakarta", "yyyy-MM-dd");
+      rowTime = Utilities.formatDate(rowTimestamp, "Asia/Jakarta", "HH:mm");
+    } else if (typeof rowTimestamp === 'string') {
+      rowDate = rowTimestamp.substring(0, 10);
+      var timePart = rowTimestamp.substring(11).trim();
+      var timeParts = timePart.split(':');
+      if (timeParts.length >= 2) {
+        rowTime = timeParts[0].padStart(2, '0') + ':' + timeParts[1].padStart(2, '0');
+      } else {
+        rowTime = "00:00";
+      }
+    } else {
+      continue;
+    }
+    
+    // Filter bulan & tahun
+    var dateParts = rowDate.split('-');
+    var rowBulan = parseInt(dateParts[1]);
+    var rowTahun = parseInt(dateParts[0]);
+    
+    if (rowBulan !== bulanNum || rowTahun !== tahunNum) continue;
+    
+    // Init karyawan
+    if (!karyawanMap[rowNama]) {
+      karyawanMap[rowNama] = { dates: {} };
+    }
+    if (!karyawanMap[rowNama].dates[rowDate]) {
+      karyawanMap[rowNama].dates[rowDate] = [];
+    }
+    
+    karyawanMap[rowNama].dates[rowDate].push({
+      tipe: rowTipe,
+      jam: rowTime
+    });
+  }
+  
+  // 5. Hitung izin per karyawan (APPROVED saja)
+  var izinMap = {}; // { nama: { sakit: N, izin: N, cuti: N } }
+  
+  for (var j = 1; j < izinData.length; j++) {
+    var izinNama = izinData[j][1];
+    var izinJenis = izinData[j][2]; // Sakit, Izin, Cuti
+    var izinTanggal = izinData[j][3];
+    var izinStatus = izinData[j][6];
+    var izinDurasi = izinData[j][8] || "SEHARI_PENUH";
+    
+    if (izinStatus !== 'APPROVED') continue;
+    
+    // Parse tanggal izin
+    var izinDateStr = "";
+    if (izinTanggal instanceof Date) {
+      izinDateStr = Utilities.formatDate(izinTanggal, "Asia/Jakarta", "yyyy-MM-dd");
+    } else if (typeof izinTanggal === 'string') {
+      izinDateStr = izinTanggal.substring(0, 10);
+    }
+    
+    if (!izinDateStr) continue;
+    
+    var izinParts = izinDateStr.split('-');
+    var izinBulan = parseInt(izinParts[1]);
+    var izinTahun = parseInt(izinParts[0]);
+    
+    if (izinBulan !== bulanNum || izinTahun !== tahunNum) continue;
+    
+    if (!izinMap[izinNama]) {
+      izinMap[izinNama] = { sakit: 0, izin: 0, cuti: 0 };
+    }
+    
+    // Durasi: SEHARI_PENUH = 1, SETENGAH_HARI = 0.5
+    var durasiValue = (izinDurasi === 'SETENGAH_HARI') ? 0.5 : 1;
+    
+    var jenisLower = izinJenis.toLowerCase();
+    if (jenisLower === 'sakit') {
+      izinMap[izinNama].sakit += durasiValue;
+    } else if (jenisLower === 'izin') {
+      izinMap[izinNama].izin += durasiValue;
+    } else if (jenisLower === 'cuti') {
+      izinMap[izinNama].cuti += durasiValue;
+    }
+    
+    // Juga tambahkan ke karyawanMap agar tercatat
+    if (!karyawanMap[izinNama]) {
+      karyawanMap[izinNama] = { dates: {} };
+    }
+  }
+  
+  // 6. Build result per karyawan
+  var result = [];
+  
+  for (var nama in karyawanMap) {
+    var karyawan = karyawanMap[nama];
+    var dates = karyawan.dates;
+    
+    var totalHadir = 0;
+    var totalJamKerja = 0; // dalam menit
+    var totalTerlambat = 0;
+    var totalLembur = 0; // sesi lembur
+    var detailHarian = [];
+    
+    for (var date in dates) {
+      var entries = dates[date];
+      
+      // Cek apakah hari kerja (Senin-Sabtu, 0=Minggu, 6=Sabtu)
+      var dayOfWeek = new Date(date + "T00:00:00").getDay();
+      if (dayOfWeek === 0) continue; // Skip Minggu
+      
+      // Hitung sesi MASUK-PULANG
+      var masukEntries = [];
+      var pulangEntries = [];
+      
+      for (var k = 0; k < entries.length; k++) {
+        if (entries[k].tipe === 'MASUK') masukEntries.push(entries[k]);
+        if (entries[k].tipe === 'PULANG') pulangEntries.push(entries[k]);
+      }
+      
+      if (masukEntries.length > 0) {
+        totalHadir++;
+        
+        // Cek terlambat (MASUK pertama setelah 08:00)
+        var jamMasukPertama = masukEntries[0].jam;
+        if (jamMasukPertama > "08:00") {
+          totalTerlambat++;
+        }
+        
+        // Hitung jumlah sesi - lebih dari 1 = lembur
+        if (masukEntries.length > 1) {
+          totalLembur += (masukEntries.length - 1);
+        }
+        
+        // Hitung total jam kerja per sesi
+        var sesiCount = Math.min(masukEntries.length, pulangEntries.length);
+        for (var s = 0; s < sesiCount; s++) {
+          var jamIn = masukEntries[s].jam.split(':');
+          var jamOut = pulangEntries[s].jam.split(':');
+          var menitIn = parseInt(jamIn[0]) * 60 + parseInt(jamIn[1]);
+          var menitOut = parseInt(jamOut[0]) * 60 + parseInt(jamOut[1]);
+          var durasi = menitOut - menitIn;
+          if (durasi > 0) {
+            totalJamKerja += durasi;
+          }
+        }
+      }
+    }
+    
+    // Izin data
+    var izinInfo = izinMap[nama] || { sakit: 0, izin: 0, cuti: 0 };
+    
+    // Alfa = hari kerja - hadir - sakit - izin - cuti
+    var totalAlfa = totalHariKerja - totalHadir - izinInfo.sakit - izinInfo.izin - izinInfo.cuti;
+    if (totalAlfa < 0) totalAlfa = 0;
+    
+    // Jam kerja dalam format jam
+    var jamKerjaDecimal = Math.round((totalJamKerja / 60) * 100) / 100;
+    var rataRata = totalHadir > 0 ? Math.round((jamKerjaDecimal / totalHadir) * 100) / 100 : 0;
+    
+    result.push({
+      nama: nama,
+      totalHariKerja: totalHariKerja,
+      hadir: totalHadir,
+      sakit: izinInfo.sakit,
+      izin: izinInfo.izin,
+      cuti: izinInfo.cuti,
+      alfa: totalAlfa,
+      totalJamKerja: jamKerjaDecimal,
+      rataRataJam: rataRata,
+      terlambat: totalTerlambat,
+      lembur: totalLembur
+    });
+  }
+  
+  // Sort by nama
+  result.sort(function(a, b) {
+    return a.nama.localeCompare(b.nama);
+  });
+  
+  Logger.log("Payroll result: " + result.length + " karyawan");
+  
+  return createJSONResponse({
+    bulan: bulanNum,
+    tahun: tahunNum,
+    totalHariKerja: totalHariKerja,
+    data: result
+  });
+}
+
+/**
+ * Hitung jumlah hari kerja (Senin-Sabtu) dalam sebulan
+ */
+function hitungHariKerja(bulan, tahun) {
+  var totalDays = new Date(tahun, bulan, 0).getDate(); // jumlah hari dalam bulan
+  var count = 0;
+  
+  for (var d = 1; d <= totalDays; d++) {
+    var day = new Date(tahun, bulan - 1, d).getDay();
+    // 0 = Minggu, 1-6 = Senin-Sabtu
+    if (day !== 0) {
+      count++;
+    }
+  }
+  
+  return count;
 }
 
 // ============================================
