@@ -6,8 +6,8 @@
 // CONFIGURATION
 // ==========================================
 
-// Ganti URL ini dengan URL Web App dari Google Apps Script Anda
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzox4QboNOE3xnWlK3VOWJDth3PdBodNn2z-a_GIe4TDepvanfXjVmEQvnOgQ3e7FFX/exec';
+// URL Apps Script diambil dari config.js (sudah di-load sebelum file ini)
+// Jika perlu override, edit config.js di root folder
 
 // ==========================================
 // GLOBAL VARIABLES

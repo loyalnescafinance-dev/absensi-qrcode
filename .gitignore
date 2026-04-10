@@ -16,3 +16,16 @@ Thumbs.db
 # Temp files
 *.tmp
 *.temp
+
+# AI/Claude files
+.claude/
+.gemini/
+
+# Screenshots (development only)
+SS/
+
+# Zip files
+siap di zip/
+
+# Sensitive files - jangan commit URL production
+Absensi*url*.txt

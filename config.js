@@ -16,13 +16,13 @@ const CONFIG = {
     // WAJIB DIGANTI - URL Backend
     // ==========================================
     // Dapatkan URL ini dari: Google Sheets → Extensions → Apps Script → Deploy → Web app
-    APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbw_auQAH6kPH-ivJPTgnsY_lsqieizti_1IrjjeYAl2t8hWok_nY5o9ngwA9s--t9md/exec',
+    APPS_SCRIPT_URL: 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE',
 
     // ==========================================
-    // INFO PERUSAHAAN (Opsional)
+    // INFO PERUSAHAAN
     // ==========================================
-    COMPANY_NAME: 'Nama Perusahaan',
-    ADMIN_EMAIL: 'admin@example.com',
+    COMPANY_NAME: 'Loyalnesca',
+    ADMIN_EMAIL: 'admin@loyalnesca.com',
 
     // ==========================================
     // PENGATURAN SISTEM (Jangan diubah kecuali perlu)
