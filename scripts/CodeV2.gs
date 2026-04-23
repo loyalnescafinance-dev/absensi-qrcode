@@ -206,7 +206,7 @@ function checkAbsensiHariIni(nama) {
       rowDate = rowTimestamp.substring(0, 10);
     }
 
-    if (rowDate === today && rowNama === nama) {
+    if (rowDate === today && String(rowNama) === String(nama)) {
       if (rowTipe === 'MASUK') sudahMasuk = true;
       if (rowTipe === 'PULANG') sudahPulang = true;
     }
@@ -257,7 +257,7 @@ function validateAbsensi(nama, tipe) {
       continue;
     }
     
-    if (rowDate === todayStr && rowNama === nama) {
+    if (rowDate === todayStr && String(rowNama) === String(nama)) {
       // Ini entry terakhir untuk hari ini (karena loop dari belakang)
       lastEntryType = rowTipe;
       break;
@@ -384,7 +384,7 @@ function checkAbsensiHariIni(nama) {
       continue;
     }
 
-    if (rowDate === todayStr && rowNama === nama) {
+    if (rowDate === todayStr && String(rowNama) === String(nama)) {
       todayEntries.push({ tipe: rowTipe, jam: rowTime });
     } else if (rowDate < todayStr) {
       break;
