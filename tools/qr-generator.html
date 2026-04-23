@@ -236,8 +236,7 @@
 
             <div class="form-group">
                 <label for="baseUrl">Link Web Halaman Absensi *</label>
-                <input type="url" id="baseUrl" placeholder="https://username.github.io/absensi-qrcode/"
-                    value="https://loyalnescafinance-dev.github.io/absensi-qrcode/">
+                <input type="url" id="baseUrl" placeholder="https://username.github.io/absensi-qrcode/">
             </div>
 
             <div class="form-group">
@@ -335,6 +334,12 @@
 
         // Load saved data from localStorage on page load
         document.addEventListener('DOMContentLoaded', function() {
+            // Set dynamic default base URL based on current location
+            const currentPath = window.location.pathname;
+            const rootPath = currentPath.substring(0, currentPath.lastIndexOf('/tools/'));
+            const dynamicBaseUrl = window.location.origin + (rootPath ? rootPath + '/' : '/');
+            document.getElementById('baseUrl').value = dynamicBaseUrl;
+            
             loadSavedData();
         });
 
@@ -344,8 +349,16 @@
             const savedLogo = localStorage.getItem('qr_logo');
 
             if (savedBaseUrl) {
-                document.getElementById('baseUrl').value = savedBaseUrl;
-                showSaveStatus('✅ Data perusahaan dimuat dari penyimpanan', 'success');
+                // Check if the saved base URL has a different hostname than the current one
+                try {
+                    const savedUrlObj = new URL(savedBaseUrl);
+                    if (savedUrlObj.hostname === window.location.hostname) {
+                        document.getElementById('baseUrl').value = savedBaseUrl;
+                        showSaveStatus('✅ Data perusahaan dimuat dari penyimpanan', 'success');
+                    }
+                } catch(e) {
+                    // Ignore invalid URLs
+                }
             }
             if (savedPerusahaan) {
                 document.getElementById('perusahaan').value = savedPerusahaan;
@@ -390,7 +403,11 @@
                 localStorage.removeItem('qr_perusahaan');
                 localStorage.removeItem('qr_logo');
 
-                document.getElementById('baseUrl').value = 'https://loyalnescafinance-dev.github.io/absensi-qrcode/';
+                const currentPath = window.location.pathname;
+                const rootPath = currentPath.substring(0, currentPath.lastIndexOf('/tools/'));
+                const dynamicBaseUrl = window.location.origin + (rootPath ? rootPath + '/' : '/');
+                
+                document.getElementById('baseUrl').value = dynamicBaseUrl;
                 document.getElementById('perusahaan').value = '';
                 document.getElementById('logo').value = '';
 
