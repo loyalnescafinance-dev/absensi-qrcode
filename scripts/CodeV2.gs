@@ -87,11 +87,13 @@ function doPost(e) {
         .setMimeType(ContentService.MimeType.JSON);
     }
 
+    var finalTipe = validation.finalTipe || data.tipe;
+
     // Tambah data ke sheet
     sheet.appendRow([
       formattedTimestamp,
       data.nama || "",
-      data.tipe || "",
+      finalTipe || "",
       data.latitude || "",
       data.longitude || "",
       data.deviceType || "",
@@ -105,11 +107,11 @@ function doPost(e) {
     return ContentService
       .createTextOutput(JSON.stringify({
         status: "success",
-        message: "Absensi " + data.tipe + " berhasil dicatat",
+        message: "Absensi " + finalTipe + " berhasil dicatat",
         timestamp: formattedTimestamp,
         data: {
           nama: data.nama,
-          tipe: data.tipe,
+          tipe: finalTipe,
           photoUrl: photoUrl
         }
       }))
@@ -269,12 +271,16 @@ function validateAbsensi(nama, tipe) {
   Logger.log("Validate - Nama: " + nama + ", Tipe: " + tipe + ", LastEntry: " + lastEntryType);
 
   // Validasi berdasarkan entry terakhir
+  var finalTipe = tipe;
+
   if (tipe === 'MASUK') {
-    if (lastEntryType === 'MASUK') {
+    if (lastEntryType === 'MASUK' || lastEntryType === 'MASUK LEMBUR') {
       // Sudah MASUK, belum PULANG
       return { valid: false, message: "Anda sudah MASUK dan belum PULANG. Silakan absen PULANG dulu." };
     }
-    // lastEntryType null (belum absen) atau 'PULANG' → bisa MASUK
+    if (lastEntryType === 'PULANG' || lastEntryType === 'PULANG LEMBUR') {
+      finalTipe = 'MASUK LEMBUR';
+    }
   }
 
   if (tipe === 'PULANG') {
@@ -282,14 +288,16 @@ function validateAbsensi(nama, tipe) {
       // Belum ada entry sama sekali
       return { valid: false, message: "Belum absen MASUK hari ini." };
     }
-    if (lastEntryType === 'PULANG') {
+    if (lastEntryType === 'PULANG' || lastEntryType === 'PULANG LEMBUR') {
       // Terakhir PULANG, belum MASUK lagi
       return { valid: false, message: "Anda sudah PULANG. Silakan absen MASUK dulu untuk sesi berikutnya." };
     }
-    // lastEntryType 'MASUK' → bisa PULANG
+    if (lastEntryType === 'MASUK LEMBUR') {
+      finalTipe = 'PULANG LEMBUR';
+    }
   }
 
-  return { valid: true };
+  return { valid: true, finalTipe: finalTipe };
 }
 
 /**
@@ -309,19 +317,22 @@ function autoFixLupaAbsen(nama) {
   for (var i = data.length - 1; i >= 1; i--) {
     var rowDate = data[i][0].toString().substring(0, 10);
 
-    if (rowDate === yesterdayStr && data[i][1] === nama && data[i][2] === 'MASUK') {
+    if (rowDate === yesterdayStr && data[i][1] === nama && (data[i][2] === 'MASUK' || data[i][2] === 'MASUK LEMBUR')) {
       var jamMasukStr = data[i][0].toString().substring(11, 19);
       var jamMasuk = new Date(rowDate + 'T' + jamMasukStr);
 
       // Tambah 8 jam
       var jamPulang = new Date(jamMasuk.getTime() + JAM_KERJA * 60 * 60 * 1000);
       var pulangStr = Utilities.formatDate(jamPulang, "Asia/Jakarta", "yyyy-MM-dd HH:mm:ss");
+      
+      var isLembur = (data[i][2] === 'MASUK LEMBUR');
+      var tipePulang = isLembur ? 'PULANG LEMBUR' : 'PULANG';
 
       // Catat PULANG otomatis
       sheet.appendRow([
         pulangStr,
         nama,
-        "PULANG",
+        tipePulang,
         "", // No GPS for auto-fix
         "",
         "", "", "", "", // No device info
@@ -404,14 +415,14 @@ function checkAbsensiHariIni(nama) {
   
   for (var j = 0; j < todayEntries.length; j++) {
     var entry = todayEntries[j];
-    if (entry.tipe === 'MASUK') {
+    if (entry.tipe === 'MASUK' || entry.tipe === 'MASUK LEMBUR') {
       sesiCount++;
       lastMasukJam = entry.jam;
       lastPulangJam = ''; // Reset pulang untuk sesi baru
-      lastType = 'MASUK';
-    } else if (entry.tipe === 'PULANG') {
+      lastType = 'MASUK'; // treat internally as MASUK for status logic
+    } else if (entry.tipe === 'PULANG' || entry.tipe === 'PULANG LEMBUR') {
       lastPulangJam = entry.jam;
-      lastType = 'PULANG';
+      lastType = 'PULANG'; // treat internally as PULANG
     }
   }
 
@@ -492,9 +503,9 @@ function getSummaryHariIni() {
       if (!karyawanStatus[rowNama]) {
         karyawanStatus[rowNama] = { hasMasuk: false, hasPulang: false };
       }
-      if (rowTipe === 'MASUK') {
+      if (rowTipe === 'MASUK' || rowTipe === 'MASUK LEMBUR') {
         karyawanStatus[rowNama].hasMasuk = true;
-      } else if (rowTipe === 'PULANG') {
+      } else if (rowTipe === 'PULANG' || rowTipe === 'PULANG LEMBUR') {
         karyawanStatus[rowNama].hasPulang = true;
       }
     }
